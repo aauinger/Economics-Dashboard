@@ -1,0 +1,51 @@
+name: Update dashboard data
+
+# Erzeugt data/risk.json neu (FRED EPU/WUI/TPU + Caldara-Iacoviello GPR)
+# und committet die Datei zurueck ins Repo. GitHub Pages deployt danach
+# automatisch die aktualisierte Version.
+
+on:
+  schedule:
+    # Jeden Montag 06:00 UTC. Die Indizes sind monatlich/quartalsweise;
+    # bei unveraenderten Daten wird NICHTS committet (siehe Schritt unten).
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}   # erlaubt manuelles Ausloesen im Actions-Tab
+
+permissions:
+  contents: write          # noetig, damit der Job zurueck pushen darf
+
+# Verhindert parallele Laeufe, die sich beim Push in die Quere kommen
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update-risk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pandas requests openpyxl xlrd
+
+      - name: Regenerate data/risk.json
+        run: python update_risk.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/risk.json
+          if git diff --staged --quiet; then
+            echo "Keine neuen Daten - risk.json unveraendert, kein Commit."
+          else
+            git commit -m "chore(data): update risk.json (automated)"
+            git push
+            echo "risk.json aktualisiert und gepusht."
+          fi
