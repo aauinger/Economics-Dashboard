@@ -1,8 +1,10 @@
 name: Update dashboard data
 
-# Erzeugt data/risk.json neu (FRED EPU/WUI/TPU + Caldara-Iacoviello GPR)
-# und committet die Datei zurueck ins Repo. GitHub Pages deployt danach
-# automatisch die aktualisierte Version.
+# Erzeugt die data/*.json neu und committet sie zurueck ins Repo.
+# GitHub Pages deployt danach automatisch die aktualisierte Version.
+#   risk.json         FRED EPU/WUI/TPU + Caldara-Iacoviello GPR
+#   global.json       IMF WEO (live) + OECD/WB/UN (gepflegte Konstanten)
+#   correlation.json  S&P 500 (Yahoo) + US-10J (FRED) -> Engine im Dashboard
 
 on:
   schedule:
@@ -34,18 +36,27 @@ jobs:
       - name: Install dependencies
         run: pip install pandas requests openpyxl xlrd
 
+      # Jeder Generator schreibt atomar; faellt eine Quelle aus, bleibt die
+      # jeweils alte Datei erhalten. '|| true' verhindert, dass der Ausfall
+      # EINER Quelle die Aktualisierung der anderen blockiert.
       - name: Regenerate data/risk.json
-        run: python update_risk.py
+        run: python update_risk.py || true
+
+      - name: Regenerate data/global.json
+        run: python update_global.py || true
+
+      - name: Regenerate data/correlation.json
+        run: python update_correlation.py || true
 
       - name: Commit & push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/risk.json
+          git add data/risk.json data/global.json data/correlation.json
           if git diff --staged --quiet; then
-            echo "Keine neuen Daten - risk.json unveraendert, kein Commit."
+            echo "Keine neuen Daten - kein Commit."
           else
-            git commit -m "chore(data): update risk.json (automated)"
+            git commit -m "chore(data): refresh dashboard data (automated)"
             git push
-            echo "risk.json aktualisiert und gepusht."
+            echo "Daten aktualisiert und gepusht."
           fi

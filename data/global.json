@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "asof": "2026",
+    "source": "IMF WEO · OECD · World Bank · UN (DESA)"
+  },
+  "bip": 3.1,
+  "infl": 4.4,
+  "bigfour": [
+    {"key": "IMF",  "v": 3.1, "note": "World Economic Outlook",     "url": "https://www.imf.org/en/publications/weo/issues/2026/04/14/world-economic-outlook-april-2026"},
+    {"key": "OECD", "v": 3.0,  "note": "Economic Outlook",           "url": "https://www.oecd.org/en/publications/oecd-economic-outlook-volume-2026-issue-1_2d1956f0-en.html"},
+    {"key": "WB",   "v": 2.7,  "note": "Global Economic Prospects",  "url": "https://openknowledge.worldbank.org/server/api/core/bitstreams/d01f39ea-732b-4816-92ac-d6c26205dda9/content"},
+    {"key": "UN",   "v": 2.9,  "note": "WESP",                        "url": "https://desapublications.un.org/publications/world-economic-situation-and-prospects-mid-2026"}
+  ]
+}
